@@ -3,7 +3,7 @@ use crate::{Data, Error};
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 /// Ping this bot's latency
-#[poise::command(slash_command, prefix_command, user_cooldown = 10)]
+#[poise::command(slash_command, prefix_command, user_cooldown = 10)] // https://docs.rs/poise/0.6.2/poise/macros/attr.command.html
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     let latency = ctx.ping().await;
 
