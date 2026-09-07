@@ -1,6 +1,6 @@
 # Discord-PoiseSerenity (`theta_bot`)
 
-> A high-performance, modular Discord bot built with Rust, Poise, and serenity. >:3
+> A high-performance, modular Discord bot built with Rust, Poise, and serenity >:3
 
 [![Rust](https://img.shields.io/badge/Rust-2024_Edition-orange?logo=rust)](https://www.rust-lang.org/)
 [![Framework](https://img.shields.io/badge/Framework-Poise-blue)](https://github.com/serenity-rs/poise)
@@ -12,7 +12,7 @@
 
 **Discord-PoiseSerenity** or known as *ThetaBot* is a modern, cloud-native Discord bot designed with clean, modular architecture and type-safe command handling. Built to demonstrate high-concurrency bot patterns in Rust.
 
-*Note: This project is currently a **Work in Progress (WIP)**.* :p
+*Note: This project is currently a **Work in Progress (WIP)*** :p
 
 ---
 
