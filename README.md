@@ -61,8 +61,8 @@ And more modules will be added more soon! >:3c
 
 ```
 # Clone the repository
-git clone https://github.com/Aarchfel/theta_bot.git
-cd theta_bot
+git clone https://github.com/Aarchfel/Discrod-PoiseSerenity.git
+cd Discord-PoiseSerenity
 
 # Run in development mode
 cargo run
