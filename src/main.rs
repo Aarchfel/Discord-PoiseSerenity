@@ -38,8 +38,10 @@ async fn main() {
             },
             ..Default::default()
         })
-        .setup(|ctx, _ready, framework| {
+        .setup(|ctx, ready_data, framework| {
             Box::pin(async move {
+                log_info!("Bot is ready! Connected as {}", ready_data.user.name);
+
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
 
                 let logger = Logger::new();
