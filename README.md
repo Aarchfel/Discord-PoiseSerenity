@@ -61,7 +61,7 @@ And more modules will be added more soon! >:3c
 
 ```
 # Clone the repository
-git clone [https://github.com/Aarchfel/theta_bot.git](https://github.com/Aarchfel/theta_bot.git)
+git clone https://github.com/Aarchfel/theta_bot.git
 cd theta_bot
 
 # Run in development mode
@@ -73,3 +73,6 @@ cargo run
 ## License
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information >:p
 
+<p align="right">
+  <i>Officially started this project on September 8, 2026</i>
+</p>
