@@ -1,10 +1,11 @@
 # Discord-PoiseSerenity (`theta_bot`)
 
-> A high-performance, modular Discord bot built with Rust, Poise, and Serenity >:3
+> An all in one high-performance, modular Discord bot built with Rust, Poise, and Serenity built for moderation and utilities/funsies >:3
 
 [![Rust](https://img.shields.io/badge/Rust-2024_Edition-orange?logo=rust)](https://www.rust-lang.org/)
 [![Framework](https://img.shields.io/badge/Framework-Poise-blue)](https://github.com/serenity-rs/poise)
 [![Status](https://img.shields.io/badge/Status-In_Active_Development-yellow)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
@@ -12,7 +13,7 @@
 
 **Discord-PoiseSerenity** or known as *ThetaBot* is a modern, cloud-native Discord bot designed with clean, modular architecture and type-safe command handling. Built to demonstrate high-concurrency bot patterns in Rust.
 
-*Note: This project is currently a **Work in Progress (WIP)*** :p
+*Very Big Note: This project is currently a `Work in Progress (WIP)`* :3c
 
 ---
 
@@ -28,7 +29,7 @@
 
 ---
 
-# Project Structure
+## Project Structure
 ```
 src/
 ├── commands.rs         # Centralized command registration aggregator
@@ -46,33 +47,77 @@ And more modules will be added more soon! >:3c
 ---
 
 ## Features Roadmap
-- **[x] Modular Command Systen**: Scalable directory structure for seamless command expansion
-- **[x] Latency & Health diagnostic**: `/ping` and runtime metrics, could be added more
-- **[ ] Dual-Database Integration**: Hybrid database setup (PostgreSQL + SQLite) for optimal query performance
+- **[x] Modular Command System**: Scalable directory structure for seamless command expansion
+- **[x] Latency & Health diagnostic**: `/ping` endpoint and runtime metrics with room for expansion
 - **[ ] Seyfert Parity**: Porting core moderation and utility features from the previous [Discord-SeyfertFramework](https://github.com/Aarchfel/Discord-SeyfertFramework/tree/development) Implementation
-- **[ ] Voice Queueing System**: Audio player functionality powered by `songbird`
+- **[ ] Dual-Database Integration**: Hybrid database setup (PostgreSQL + SQLite) for optimal query performance
+- **[ ] Verification System**: Guild member verification system with customizable options for administrators/moderators
 - **[ ] AI Moderation System**: Chat moderation powered with AI collecting messages each 40 seconds (Batching mechanism)
 - **[ ] Ticket System**: Customizeable ticket system that creates dedicated channels for members
-- **[ ] Verification System**: Guild member verification system with customizable options for administrators/moderators
+- **[ ] Voice Queueing System**: Audio player functionality powered by `songbird`
+- **[ ] Multi-Language Translation**: AI-powered translation support across multiple languages
+- *And more to come...*
 
 ---
 
-## Getting Started (Local Development)
+## Getting Started
+
+### Prerequisites
+
+* **Rust** (2024 Edition) installed via [`rustup`](https://rustup.rs/)
+* A **Discord Bot Token** from the [Discord Developer Portal](https://discord.com/developers/applications)
+
+### Environment Variables
+
+Before running the bot, create a `.env` file in root directory:
 
 ```
-# Clone the repository
-git clone https://github.com/Aarchfel/Discrod-PoiseSerenity.git
-cd Discord-PoiseSerenity
+cp .env.example .env
+```
 
-# Run in development mode
+### Configure the following variables in your .env file:
+
+| Variable | Required | Default | Description |
+| :--- | :---: | :---: | :--- |
+| `DISCORD_TOKEN` | Yes | - | Bot Token from Discord Developer Portal |
+
+
+### Installation & Running
+
+1. Clone the repository:
+
+```
+git clone https://github.com/Aarchfel/Discord-PoiseSerenity.git
+cd Discord-PoiseSerenity
+```
+
+2. Build and run in development mode:
+```
 cargo run
 ```
+
+3. Build for production:
+```
+cargo build --release
+./target/release/theta_bot
+```
+---
+
+## Special Thanks
+- Thank you so much to myself for not giving up
+- Thank you so much to my dear partner for all the love
+- Thanks to my PC for not blowing up every time
+- Thanks to my Father & Mother for my living
 
 ---
 
 ## License
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information >:p
 
+<p align="center">
+  <i>Programming is elegant. Only God knows how this code works.</i>
+</p>
+
 <p align="right">
-  <i>Officially started this project on September 8, 2026</i>
+  <sub><i>Officially started this project on September 8, 2026</i></sub>
 </p>
