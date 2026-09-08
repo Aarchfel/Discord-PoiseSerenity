@@ -1,6 +1,6 @@
 # Discord-PoiseSerenity (`theta_bot`)
 
-> A high-performance, modular Discord bot built with Rust, Poise, and serenity >:3
+> A high-performance, modular Discord bot built with Rust, Poise, and Serenity >:3
 
 [![Rust](https://img.shields.io/badge/Rust-2024_Edition-orange?logo=rust)](https://www.rust-lang.org/)
 [![Framework](https://img.shields.io/badge/Framework-Poise-blue)](https://github.com/serenity-rs/poise)
