@@ -114,6 +114,8 @@ cargo build --release
 ## License
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information >:p
 
+<br/>
+
 <p align="center">
   <i>Programming is elegant. Only God knows how this code works.</i>
 </p>
