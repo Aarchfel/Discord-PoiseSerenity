@@ -118,7 +118,7 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 
 <h1 align="center">
     Discord-PoiseSerenity
-<h1/>
+</h1>
 
 <p align="center">
   <i>Programming is elegant. Only God knows how this code works.</i>
