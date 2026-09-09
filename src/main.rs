@@ -1,8 +1,7 @@
+use chrono::{DateTime, Utc};
 use poise::serenity_prelude::{self as serenity, ActivityData, OnlineStatus};
 use songbird::SerenityInit;
 use std::{env, sync::Arc};
-
-use crate::logger::Logger;
 
 mod commands;
 mod db;
@@ -12,9 +11,14 @@ mod logger;
 use error::on_error;
 
 pub struct Data {
-    pub logger: Logger,
+    pub start_time: DateTime<Utc>,
+    pub http: reqwest::Client,
 }
+
 type Error = Box<dyn std::error::Error + Send + Sync>;
+
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[tokio::main]
 async fn main() {
@@ -44,10 +48,9 @@ async fn main() {
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
 
-                let logger = Logger::new();
                 let cmd_count = framework.options().commands.len();
 
-                log_info!("Loaded {} commands globally", cmd_count);
+                log_info!("Loaded {} command(s) globally", cmd_count);
 
                 for cmd in &framework.options().commands {
                     log_debug!(
@@ -57,7 +60,10 @@ async fn main() {
                     );
                 }
 
-                Ok(Data { logger })
+                Ok(Data {
+                    start_time: Utc::now(),
+                    http: reqwest::Client::new(),
+                })
             })
         })
         .build();
@@ -72,15 +78,7 @@ async fn main() {
         .await
         .expect("Failed to create serenity client");
 
-    let logger = Logger::new();
-
-    logger.info(format_args!("Connecting..."));
-    logger.debug(format_args!(
-        "Bot is running, connected as {}",
-        client.cache.current_user().name
-    ));
-
     if let Err(why) = client.start().await {
-        logger.error(format_args!("Client Error: {}", why));
+        log_critical!("Client error: {}", why);
     }
 }

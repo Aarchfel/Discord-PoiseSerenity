@@ -1,5 +1,6 @@
 use crate::{Data, Error};
 
+pub mod admin;
 pub mod debug;
 
 // Register All Commands
@@ -28,6 +29,7 @@ fn user_commands() -> Vec<poise::Command<Data, Error>> {
 
 fn admin_commands() -> Vec<poise::Command<Data, Error>> {
     vec![
+        admin::setup(),
         // more commands
     ]
 }

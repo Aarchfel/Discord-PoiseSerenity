@@ -56,6 +56,34 @@ pub async fn on_error(err: FrameworkError<'_, Data, Error>) {
             }
         }
 
+        // Missing User Perms Handler
+        FrameworkError::MissingUserPermissions {
+            ctx,
+            missing_permissions,
+            ..
+        } => {
+            let _ = ctx
+                .say(format!(
+                    "You are __missing__ the following permission(s) to run this command: {:?}",
+                    missing_permissions
+                ))
+                .await;
+        }
+
+        // Missing Bot Perms Handler
+        FrameworkError::MissingBotPermissions {
+            ctx,
+            missing_permissions,
+            ..
+        } => {
+            let _ = ctx
+                .say(format!(
+                    "I am __missing__ the following permission(s) to run this command: {:?}",
+                    missing_permissions
+                ))
+                .await;
+        }
+
         // Other Error Handler
         other_error => {
             if let Err(e) = poise::builtins::on_error(other_error).await {
