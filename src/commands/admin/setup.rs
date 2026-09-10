@@ -1,6 +1,7 @@
-use crate::{Data, Error};
+use crate::bot::Data;
+use crate::error::{BotError, CommandResult};
 
-type Context<'a> = poise::Context<'a, Data, Error>;
+type Context<'a> = poise::Context<'a, Data, BotError>;
 
 /// Setup your server configurations
 #[poise::command(
@@ -11,7 +12,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
     required_permissions = "MANAGE_GUILD" // TO CHECK PERMS YOU CAN SEE IT WITH AUTOCOMPLETE POISE
                                           // SERENITY PRELUDE PERMISSIONS MODULES
 )]
-pub async fn setup(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn setup(ctx: Context<'_>) -> CommandResult {
     ctx.send(poise::CreateReply::default().content("Setup your server configurations - TODO"))
         .await?;
 

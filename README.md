@@ -80,6 +80,9 @@ cp .env.example .env
 | Variable | Required | Default | Description |
 | :--- | :---: | :---: | :--- |
 | `DISCORD_TOKEN` | Yes | - | Bot Token from Discord Developer Portal |
+| `DATABASE_URL` | Yes | - | PostgreSQL Connection String (e.g., Supabase / Transaction Pooler) |
+| `SQLITE_PATH` | No | `./data/cache.sqlite` | Local SQLite database path for local caching |
+| `MAX_AI_WORKERS` | No | `3` | Maximum concurrent background workers for moderation AI |
 
 
 ### Installation & Running

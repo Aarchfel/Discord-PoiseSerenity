@@ -1,10 +1,11 @@
-use crate::{Data, Error};
+use crate::{Data, Error, error::CommandResult};
 
+// TODO: FIX THIS COMMAND, MAKE IT LOOKS LIKE setup.rs
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 /// Ping this bot's latency
 #[poise::command(slash_command, prefix_command, user_cooldown = 10)] // https://docs.rs/poise/0.6.2/poise/macros/attr.command.html
-pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn ping(ctx: Context<'_>) -> CommandResult {
     let latency = ctx.ping().await;
 
     ctx.send(

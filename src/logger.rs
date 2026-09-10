@@ -1,70 +1,67 @@
-use std::sync::Mutex;
-
-use chrono::Local;
+use std::fmt;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Duration;
 use sysinfo::{Pid, ProcessesToUpdate, RefreshKind, System};
+use tracing_subscriber::fmt::format::Writer;
+use tracing_subscriber::fmt::{FmtContext, FormatEvent, FormatFields};
+use tracing_subscriber::registry::LookupSpan;
 
-static SYSTEM_MONITOR: Mutex<Option<(System, Pid)>> = Mutex::new(None);
+// ==============================================================================
+//
+//                  Yeah yeah customized logging or type shi
+//
+// ==============================================================================
 
-pub fn log_header() -> String {
-    let time_str = Local::now().format("%I:%M:%S %p");
+pub static CURRENT_MEM_MB: AtomicUsize = AtomicUsize::new(0);
 
-    let memory_mb = if let Ok(mut guard) = SYSTEM_MONITOR.lock() {
-        let (sys, pid) = guard.get_or_insert_with(|| {
-            let s = System::new_with_specifics(RefreshKind::nothing());
-            let p = Pid::from_u32(std::process::id());
+pub fn spawn_memory_updater() {
+    tokio::spawn(async move {
+        let mut sys = System::new_with_specifics(RefreshKind::nothing());
+        let pid = Pid::from_u32(std::process::id());
 
-            (s, p)
-        });
-
-        sys.refresh_processes(ProcessesToUpdate::Some(&[*pid]), false);
-
-        if let Some(proc) = sys.process(*pid) {
-            proc.memory() / 1024 / 1024
-        } else {
-            0
+        loop {
+            sys.refresh_processes(ProcessesToUpdate::Some(&[pid]), false);
+            if let Some(proc) = sys.process(pid) {
+                let mb = (proc.memory() / 1024 / 1024) as usize;
+                CURRENT_MEM_MB.store(mb, Ordering::Relaxed);
+            }
+            tokio::time::sleep(Duration::from_secs(2)).await;
         }
-    } else {
-        0
-    };
-
-    format!(
-        "           \x1b[1;97;33m[ {} : {}mb ]\x1b[0m ClientLogger",
-        time_str, memory_mb
-    )
+    });
 }
 
-// Macro rules logger formatting
-#[macro_export]
-macro_rules! log_info {
-    ($($arg:tt)*) => {
-        println!("{} \x1b[32m[ INFO ]\x1b[0m {}", logger::log_header(), format_args!($($arg)*)); // Green Color
-    };
-}
+pub struct CustomLogFormatter;
 
-#[macro_export]
-macro_rules! log_warn {
-    ($($arg:tt)*) => {
-        println!("{} \x1b[33m[ WARN ]\x1b[0m {}", logger::log_header(), format_args!($($arg)*)); // Yellow Color
-    };
-}
+impl<S, N> FormatEvent<S, N> for CustomLogFormatter
+where
+    S: tracing::Subscriber + for<'a> LookupSpan<'a>,
+    N: for<'a> FormatFields<'a> + 'static,
+{
+    fn format_event(
+        &self,
+        ctx: &FmtContext<'_, S, N>,
+        mut writer: Writer<'_>,
+        event: &tracing::Event<'_>,
+    ) -> fmt::Result {
+        let time_str = chrono::Local::now().format("%I:%M:%S %p");
+        let mem = CURRENT_MEM_MB.load(Ordering::Relaxed);
+        let level = event.metadata().level();
 
-#[macro_export]
-macro_rules! log_error {
-    ($($arg:tt)*) => {
-        println!("{} \x1b[31m[ ERROR ]\x1b[0m {}", $crate::logger::log_header(), format_args!($($arg)*)); // Red Color
-    };
-}
+        let level_str = match *level {
+            tracing::Level::ERROR => "\x1b[31m[ ERROR ]\x1b[0m",
+            tracing::Level::WARN => "\x1b[33m[ WARN ]\x1b[0m",
+            tracing::Level::INFO => "\x1b[32m[ INFO ]\x1b[0m",
+            tracing::Level::DEBUG => "\x1b[97;44m[ DEBUG ]\x1b[0m",
+            tracing::Level::TRACE => "\x1b[35m[ TRACE ]\x1b[0m",
+        };
 
-#[macro_export]
-macro_rules! log_debug {
-    ($($arg:tt)*) => {
-        println!("{} \x1b[97;44m[ DEBUG ]\x1b[0m {}", logger::log_header(), format_args!($($arg)*)); // White blue bgcol
-    };
-}
+        write!(
+            writer,
+            "           \x1b[1;97;33m[ {} : {}mb ]\x1b[0m {} ",
+            time_str, mem, level_str
+        )?;
 
-#[macro_export]
-macro_rules! log_critical {
-    ($($arg:tt)*) => {
-        println!("{} \x1b[1;97;41m[ CRITICAL ]\x1b[0m {}", $crate::logger::log_header(), format_args!($($arg)*)); // White red bgcol
-    };
+        ctx.field_format().format_fields(writer.by_ref(), event)?;
+        writeln!(writer)
+    }
 }

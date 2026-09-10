@@ -1,38 +1,57 @@
-use chrono::{DateTime, Utc};
+use std::sync::Arc;
+
+use chrono::Utc;
 use poise::serenity_prelude::{self as serenity, ActivityData, OnlineStatus};
 use songbird::SerenityInit;
-use std::{env, sync::Arc};
 
+mod bot;
+mod cache;
 mod commands;
+mod config;
 mod db;
+mod domain;
 mod error;
 mod logger;
 
-use error::on_error;
+use bot::Data; // DATA STRUCT GOES TO bot.rs
+use config::Settings; // ENV CONFIG ETC GOES TO sconfig/settings.rs
+use error::on_error; // ERROR HANDLER ETC GOES TO error.rs
 
-pub struct Data {
-    pub start_time: DateTime<Utc>,
-    pub http: reqwest::Client,
-}
-
-type Error = Box<dyn std::error::Error + Send + Sync>;
+use error::BotError as Error;
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().ok();
-    tracing_subscriber::fmt::init();
+    logger::spawn_memory_updater();
 
-    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN cannot be found in .env!");
+    tracing_subscriber::fmt()
+        .event_format(logger::CustomLogFormatter)
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
 
-    let framework = poise::Framework::<Data, Error>::builder()
+    if let Err(err) = run().await {
+        tracing::error!("fatal error: {}", err);
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> error::Result<()> {
+    let settings = Settings::from_env()?;
+    let db = db::postgres::connect(&settings.postgres_url).await?;
+
+    let intents = serenity::GatewayIntents::non_privileged()
+        | serenity::GatewayIntents::MESSAGE_CONTENT
+        | serenity::GatewayIntents::GUILD_MESSAGES
+        | serenity::GatewayIntents::GUILD_MEMBERS; // IMPORTANT TO ALLOW ALL INTENTS ON DISCORD DEV
+
+    let settings_for_setup = settings.clone();
+
+    let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: commands::register_all(),
-
-            on_error: |error| Box::pin(on_error(error)),
-
+            on_error: |err| Box::pin(on_error(err)),
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
                 edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -42,25 +61,15 @@ async fn main() {
             },
             ..Default::default()
         })
-        .setup(|ctx, ready_data, framework| {
+        .setup(move |ctx, ready_data, framework| {
             Box::pin(async move {
-                log_info!("Bot is ready! Connected as {}", ready_data.user.name);
+                tracing::info!("Bot is ready! Connected as {}", ready_data.user.name);
 
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-
-                let cmd_count = framework.options().commands.len();
-
-                log_info!("Loaded {} command(s) globally", cmd_count);
-
-                for cmd in &framework.options().commands {
-                    log_debug!(
-                        "  - Command: /{} (subcommands: {})",
-                        cmd.name,
-                        cmd.subcommands.len()
-                    );
-                }
-
                 Ok(Data {
+                    db,
+                    config_cache: cache::ConfigCache::new(),
+                    settings: settings_for_setup,
                     start_time: Utc::now(),
                     http: reqwest::Client::new(),
                 })
@@ -68,9 +77,7 @@ async fn main() {
         })
         .build();
 
-    let intents = serenity::GatewayIntents::all();
-
-    let mut client = serenity::ClientBuilder::new(token, intents)
+    let mut client = serenity::ClientBuilder::new(&settings.discord_token, intents)
         .framework(framework)
         .register_songbird()
         .status(OnlineStatus::DoNotDisturb)
@@ -78,7 +85,6 @@ async fn main() {
         .await
         .expect("Failed to create serenity client");
 
-    if let Err(why) = client.start().await {
-        log_critical!("Client error: {}", why);
-    }
+    client.start().await?;
+    Ok(())
 }
